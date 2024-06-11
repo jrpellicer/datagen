@@ -1,0 +1,89 @@
+[
+    {
+        "file": "Clientes",
+        "records": 300,
+        "key": [
+            "id",
+            "otra"
+        ],
+        "fields": {
+            "id": {
+                "unique": "yes",
+                "type": "numeric",
+                "min": 10000,
+                "max": 10004
+            },
+            "enable": {
+                "value": "yes"
+            },
+            "gauss": {
+                "type": "numeric",
+                "distribution": "normal",
+                "mu": 100,
+                "sigma": 15,
+                "decimals": 0
+            },
+            "exp": {
+                "type": "numeric",
+                "distribution": "expo",
+                "lambd": 1.0,
+                "decimals": 2
+            },
+            "secuencial": {
+                "type": "seq",
+                "ini": 10000,
+                "decimals": 0
+            }
+        }
+    },
+    {
+        "file": "Artículos",
+        "records": 200,
+        "key": [
+            "id"
+        ],
+        "fields": {
+            "id": {
+                "unique": "yes",
+                "type": "str",
+                "len": 8,
+                "str": [
+                    {
+                        "len": 2,
+                        "type": "char"
+                    },
+                    {
+                        "len": 6,
+                        "type": "int"
+                    }
+                ]
+                
+            }
+        }
+    }, 
+    {
+        "file": "Errores",
+        "records": 200,
+        "key": [
+            "id"
+        ],
+        "fields": {
+            "id": {
+                "unique": "yes",
+                "type": "str",
+                "len": 8,
+                "str": [
+                    {
+                        "len": 2,
+                        "type": "char"
+                    },
+                    {
+                        "len": 4,
+                        "type": "int"
+                    }
+                ]
+                
+            }
+        }
+    }
+]
