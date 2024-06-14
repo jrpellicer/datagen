@@ -33,6 +33,15 @@
                 "type": "seq",
                 "ini": 10000,
                 "decimals": 0
+            },
+            "dependiente": {
+                "type": "dependent",
+                "variable": "gauss",
+                "distribution": "normal",
+                "mu": 200,
+                "sigma": 10,
+                "decimals": 0,
+                "r": 0.8
             }
         }
     },
@@ -46,7 +55,7 @@
             "id": {
                 "unique": "yes",
                 "type": "str",
-                "len": 8,
+                "len": 14,
                 "str": [
                     {
                         "len": 2,
@@ -55,6 +64,15 @@
                     {
                         "len": 6,
                         "type": "int"
+                    },
+                    {
+                        "len": 2,
+                        "type": "char"
+                    },
+                    {
+                        "len": 6,
+                        "type": "seq",
+                        "ini": 10000                   
                     }
                 ]
                 

@@ -1,5 +1,6 @@
 import json
 import random
+import numpy as np
 import string
 
 # ***********************************************************************************
@@ -11,6 +12,89 @@ def genera_valor(valor,registros):
         lista.append(valor)
     return lista
 
+# ***********************************************************************************
+# Campo dependiente *****************************************************************
+# ***********************************************************************************
+def genera_dependent(propiedades,variable,registros):
+    # Obtenemos número de decimales a calcular
+    if "decimals" in propiedades:
+        decimales=propiedades["decimals"]
+    else:
+        decimales=0
+
+    # Inicializamos lista a devolver
+    lista = []
+    
+    if "r" in propiedades:
+        r=propiedades["r"]
+
+        if "sigma" in propiedades:
+            sigma_y=propiedades["sigma"]
+        else:
+            sigma_y=1
+
+        if "mu" in propiedades:
+            mu_y=propiedades["mu"]
+        else:
+            mu=0
+
+        # Recalculamos la sigma y la mu de la variable independiente
+        mu_x=np.mean(variable)
+        sigma_x=np.std(variable)
+
+        if propiedades["distribution"] == "normal":
+                if ("mu" in propiedades) & ("sigma" in propiedades):
+                    
+                    # Para introducir correlación entre X e Y, utilizamos una combinación lineal
+                    # Y' = a * X + b * Z, donde Z es una variable aleatoria normal
+                    # y 'a' y 'b' son factores que se calculan basándose en 'r' y las desviaciones estándar
+                    z = np.random.normal(0, 1, registros)  # Variable aleatoria normal estándar
+
+                    # Calcular los factores a y b
+                    a = r * (sigma_y / sigma_x)
+                    b = np.sqrt(1 - r**2) * sigma_y
+
+                    # Generar la nueva variable Y con la correlación deseada
+                    y = mu_y + a * (variable - mu_x) + b * z
+
+                    if decimales==0:
+                        lista=(np.round(y).astype(int)).tolist()
+                    else:
+                        lista=y.tolist()
+
+        if propiedades["distribution"] == "expo":
+                if "lambd" in propiedades:
+                    if propiedades["lambd"] != 0:
+                        beta=1/propiedades["lambd"]
+                    else:
+                        beta=0
+
+                    # Generar una variable normal auxiliar (Z)
+                    z = np.random.normal(0, 1, registros)
+
+                    # Calcular los factores a y b
+                    a = r
+                    b = np.sqrt(1 - r**2)
+
+                    # Generar la nueva variable W con la correlación deseada (a partir de Z)
+                    w = a * (variable - mu_x) / sigma_x + b * z
+
+                    # Transformar W para que tenga una distribución exponencial
+                    # Aplicando la transformación inversa de la función de distribución acumulativa (CDF) de la exponencial
+                    y = np.random.exponential(beta, registros)
+
+                    # Ajustar Y para que tenga la correlación deseada con X
+                    # y_new = y + k * (w - mean(w)), donde k es un ajuste para mantener la correlación
+                    k = r * (beta / np.std(w))
+                    y = y + k * (w - np.mean(w))
+
+                    if decimales==0:
+                        lista=(np.round(y).astype(int)).tolist()
+                    else:
+                        lista=y.tolist()
+                
+    return(lista)
+                
 # ***********************************************************************************
 # Campo numérico ********************************************************************
 # ***********************************************************************************
@@ -108,6 +192,7 @@ def genera_seq(propiedades,registros):
 # ***********************************************************************************
 def genera_str(propiedades,registros):
     lista = []
+    contador=0
     for i in range(registros):
         cadena=""
         for subst in propiedades["str"]:
@@ -117,6 +202,15 @@ def genera_str(propiedades,registros):
                     cadena=cadena+numeros_aleatorios
                 if subst["type"]=="char":
                     letras_alfabeticas = ''.join(random.choices(string.ascii_uppercase, k=subst["len"]))
+                    cadena=cadena+letras_alfabeticas
+                if subst["type"]=="seq":
+                    if "ini" in subst:
+                        valor_ini=subst["ini"]
+                    else:
+                        valor_ini=0
+
+                    letras_alfabeticas = str(contador+valor_ini).zfill(subst["len"])
+                    contador = contador +1
                     cadena=cadena+letras_alfabeticas
         lista.append(cadena)
     return lista
@@ -138,6 +232,12 @@ def rellena_campo(propiedades,registros):
 
         elif tipo =="seq":
             lista_valores=genera_seq(propiedades,registros)
+        
+        elif tipo =="dependent":
+            if "variable" in propiedades:
+                if propiedades["variable"] in campos:
+                    lista_valores=genera_dependent(propiedades,campos[propiedades["variable"]],registros)
+
 
     return lista_valores
 
@@ -158,17 +258,13 @@ for fichero in datos:
         # Creamos un diccionario vacío
         campos = {}
         if "fields" in fichero:
-            for flds in fichero["fields"]:
-                campos[flds] = rellena_campo(fichero["fields"][flds],registros)
+            for fld in fichero["fields"]:
+                campos[fld] = rellena_campo(fichero["fields"][fld],registros)
 
         print(campos)
 
 
 # Comprobar unique en alfanumérico
-# Generar secuencial en alfanumérico
-
-
-
 
 
         # Generamos registros
