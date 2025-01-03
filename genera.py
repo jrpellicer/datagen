@@ -55,7 +55,7 @@ def procesar_csv(nombre_archivo):
     except FileNotFoundError:
         return [], []
     
-def genera_name(propiedades,sexo,registros):
+def genera_name(sexo,registros):
 
      # Inicializamos lista a devolver
     lista = []
@@ -80,6 +80,23 @@ def genera_name(propiedades,sexo,registros):
         if nombres:
             for i in range(registros):
                 lista.append(random.choices(nombres, weights=pesos, k=1)[0])
+
+    return lista
+
+# ***********************************************************************************
+# Campo apellido ********************************************************************
+# ***********************************************************************************
+def genera_apellido(registros):
+
+     # Inicializamos lista a devolver
+    lista = []
+    
+    nombre_archivo = "apellidos.csv"
+    apellidos, pesos = procesar_csv(nombre_archivo)
+    
+    if apellidos:
+        for i in range(registros):
+            lista.append(random.choices(apellidos, weights=pesos, k=1)[0])
 
     return lista
 
@@ -307,12 +324,15 @@ def rellena_campo(propiedades,registros):
         elif tipo =="seq":
             lista_valores=genera_seq(propiedades,registros)
         
+        elif tipo =="surname":
+            lista_valores=genera_apellido(registros)
+
         elif tipo =="name":
             sexo=[]
             if "genere" in propiedades:
                 if propiedades["genere"] in campos:
                     sexo=campos[propiedades["genere"]]
-            lista_valores=genera_name(propiedades,sexo,registros)
+            lista_valores=genera_name(sexo,registros)
 
         elif tipo =="dependent":
             if "variable" in propiedades:

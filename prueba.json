@@ -59,6 +59,31 @@
             "nombre": {
                 "type": "name",
                 "genere": "sexo"
+            },
+            "apellido1": {
+                "type": "surname"
+            },
+            "apellido2": {
+                "type": "surname"
+            }, 
+            "nombre_completo": {
+                "struct": [
+                    {
+                        "field": "apellido1"
+                    },
+                    {
+                        "literal": " "
+                    },
+                    {
+                        "field": "apellido2"
+                    },
+                    {
+                        "literal": ", "
+                    },
+                    {
+                        "field": "nombre"
+                    }
+                ]
             }
         }
     },
