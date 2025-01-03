@@ -13,6 +13,77 @@ def genera_valor(valor,registros):
     return lista
 
 # ***********************************************************************************
+# Campo valor discreto***************************************************************
+# ***********************************************************************************
+def genera_discreto(propiedades,registros):
+
+     # Inicializamos lista a devolver
+    lista = []
+
+    no_vacio= False
+    valores = []
+    pesos = []
+    for subst in propiedades["values"]:
+        if ("value" in subst) & ("percent" in subst):
+            valores.append(subst["value"])
+            pesos.append(subst["percent"])
+            no_vacio = True
+
+    if no_vacio:
+        for i in range(registros):
+            lista.append(random.choices(valores, weights=pesos, k=1)[0])
+    
+    return lista
+
+# ***********************************************************************************
+# Campo nombre **********************************************************************
+# ***********************************************************************************
+def procesar_csv(nombre_archivo):
+
+    nombres = []
+    pesos = []
+
+    try:
+        with open(nombre_archivo, 'r') as archivo:
+            for linea in archivo:
+                flds = linea.strip().split(',')
+                if len(campos) >= 2:  # Asegurarse de que hay al menos dos campos
+                    nombres.append(flds[0])
+                    pesos.append(float(flds[1]))
+
+        return nombres, pesos
+    except FileNotFoundError:
+        return [], []
+    
+def genera_name(propiedades,sexo,registros):
+
+     # Inicializamos lista a devolver
+    lista = []
+    
+    nombre_archivo = "nombres_m.csv"
+    nombres_m, pesos_m = procesar_csv(nombre_archivo)
+    nombre_archivo = "nombres_f.csv"
+    nombres_f, pesos_f = procesar_csv(nombre_archivo)
+    
+    # Comprobamos si se ha especificado variable sexo correctamente
+    if sexo:
+        # se ha especificado el sexo        
+        for i in range(registros):
+            if sexo[i] == "M":
+                lista.append(random.choices(nombres_m, weights=pesos_m, k=1)[0])
+            else:
+                lista.append(random.choices(nombres_f, weights=pesos_f, k=1)[0])
+    else:
+        # No se ha especificado el sexo
+        nombres = nombres_m + nombres_f
+        pesos = pesos_m + pesos_f
+        if nombres:
+            for i in range(registros):
+                lista.append(random.choices(nombres, weights=pesos, k=1)[0])
+
+    return lista
+
+# ***********************************************************************************
 # Campo dependiente *****************************************************************
 # ***********************************************************************************
 def genera_dependent(propiedades,variable,registros):
@@ -230,9 +301,19 @@ def rellena_campo(propiedades,registros):
         elif tipo =="str":
             lista_valores=genera_str(propiedades,registros)
 
+        elif tipo =="discrete":
+            lista_valores=genera_discreto(propiedades,registros)
+
         elif tipo =="seq":
             lista_valores=genera_seq(propiedades,registros)
         
+        elif tipo =="name":
+            sexo=[]
+            if "genere" in propiedades:
+                if propiedades["genere"] in campos:
+                    sexo=campos[propiedades["genere"]]
+            lista_valores=genera_name(propiedades,sexo,registros)
+
         elif tipo =="dependent":
             if "variable" in propiedades:
                 if propiedades["variable"] in campos:
@@ -245,7 +326,7 @@ def rellena_campo(propiedades,registros):
 with open("prueba.json", encoding='utf-8') as archivo:
     datos=json.load(archivo)
 
-# Recorremos cada una de los definiciones de ficheros en el archivo de configuración
+# Recorremos cada una de los definiciones de ficheros en el archivo de definición
 for fichero in datos:  
     if "file" in fichero:
         # Obtenemos nombre del fichero (tabla)
