@@ -276,6 +276,24 @@ def genera_seq(propiedades,registros):
     return lista
 
 # ***********************************************************************************
+# Campo estructura ******************************************************************
+# ***********************************************************************************
+def genera_struct(propiedades,registros):
+    lista = []
+
+    for i in range(registros):
+        cadena=""
+        for subst in propiedades["struct"]:
+            if "field" in subst:   
+                if subst["field"]:
+                    cadena = cadena + campos[subst["field"]][i]
+            if "literal" in subst:   
+                cadena = cadena + subst["literal"]
+
+        lista.append(cadena)
+    return lista
+
+# ***********************************************************************************
 # Campo alfabético ******************************************************************
 # ***********************************************************************************
 def genera_str(propiedades,registros):
@@ -333,6 +351,9 @@ def rellena_campo(propiedades,registros):
                 if propiedades["genere"] in campos:
                     sexo=campos[propiedades["genere"]]
             lista_valores=genera_name(sexo,registros)
+
+        elif tipo =="struct":
+            lista_valores=genera_struct(propiedades,registros)
 
         elif tipo =="dependent":
             if "variable" in propiedades:

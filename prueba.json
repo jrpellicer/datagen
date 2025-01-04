@@ -67,6 +67,7 @@
                 "type": "surname"
             }, 
             "nombre_completo": {
+                "type": "struct",
                 "struct": [
                     {
                         "field": "apellido1"
